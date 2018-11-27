@@ -1,0 +1,14 @@
+[ENV]
+MODE = DEV
+
+[PROD]
+BASE_URL = 13.209.89.152
+TOKEN    = your product token
+PATH     = /webhook
+DEBUG_MODE = 1
+
+[DEV]
+BASE_URL = 13.209.89.152
+TOKEN    = your dev token
+PATH     = /webhook
+DEBUG_MODE = 1
