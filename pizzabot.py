@@ -2,11 +2,14 @@
 
 import requests
 import json
-import urllib.request
+# import urllib.request
 from configparser import ConfigParser, NoSectionError
 from PIL import Image
-from weather import weather_info
-from coin    import coin_val
+# bytesio is used for file opened in binary mode like stringio in string mode.
+from io import BytesIO
+
+# from weather import weather_info
+from coin    import coin_info
 
 from flask import Flask, request, jsonify, render_template
 
@@ -59,8 +62,8 @@ def get_photo_size(url):
         return width, height
 
     try:
-        file = urllib.request.urlopen(url, timeout=URL_OPEN_TIME_OUT)
-        img = Image.open(file)
+        file = requests.get(url, timeout=URL_OPEN_TIME_OUT)
+        img = Image.open(BytesIO(file.content))
         width, height = img.size
     except:
         print("photo size error!")
@@ -303,12 +306,12 @@ def index():
 
 @app.route('/user/<name>')
 def user(name):
-    return '<h1>Hello, %s' %name
+    return '<h1>Hello, %s</h1>' %name
 
 @app.route('/ex01')
 def ex01():
-    # return render_template('ex01.html')
-    return 'ex01.html'
+    return render_template('ex01.html')
+    # return 'ex01.html'
 # ----------------------------------------------------
 # 메인 함수
 # ----------------------------------------------------

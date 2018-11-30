@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
-from coin import coin_val
-import json
+from coin import coin_info
+from weather import weather_info
+import requests
+
 
 mylist1 = ['코인', '날씨', '번역']
 mylist2 = ['죽전동', '강남역', '처음으로']
@@ -10,6 +12,16 @@ app = Flask(__name__)
 @app.route("/")
 def hello():
     return "Hello World!"
+
+@app.route("/user/<name>")
+def user(name):
+    return '<h1>Hello, %s</h1>' %name
+
+@app.route("/coin/<name>")
+def coin(name='ALL'):    
+    param = {'coin_name': name}
+    coin = coin_info(**param)
+    return '<h1>Coin Value %s</h1>' %coin
 
 @app.route("/keyboard", methods = ['GET'])
 def keyboard():
@@ -26,11 +38,10 @@ def message():
     
     if content == '코인':
         print('=>코인')
-        BTC, ETH,BCH,XRP = coin_val()
+        param = {'coin_name':'ALL'}
         message = {
             'message':{
-                'text': 'BTC({}) ETH({}) BCH({}) XRP({} by bithumb' 
-                .format(BTC, ETH, BCH, XRP)
+                'text': coin_info(**param)   
             },
             'keyboard':{
                 'type' : 'buttons',
@@ -52,7 +63,8 @@ def message():
     
     elif content.find('강남역') != -1:
         print('강남역 날씨')
-        msg = '강남역 날씨 맑음 5도'
+        params = {'area': content}
+        msg = weather_info(**params)
         message = {
             'message': {
                 'text' : msg
@@ -64,7 +76,8 @@ def message():
         }
     elif content.find('죽전동') != -1:
         print('죽전동 날씨')
-        msg = '죽전동 날씨 흐림 -5도'
+        params = {'area': content}
+        msg = weather_info(**params)
         message = {
             'message': {
                 'text' : msg
@@ -84,21 +97,22 @@ def message():
             },
             'keyboard':{
                 'type':'buttons',
-                'buttons':mylist2
+                'buttons':mylist1
             }
         }
         
     elif content == '처음으로':
-        print('처음으로')        
-        message = {
+        print('==>처음으로')
+        return jsonify({
             'message': {
-                'text' : '처음으로 이동합니다'
+                'text': '선택해 주세요'
             },
-            'keyboard':{
-                'type':'buttons',
-                'buttons':mylist1
+            'keyboard': {
+                'type': 'buttons',
+                'buttons': mylist1
             }
-        }
+        })
+    
     else:
         message = {
             'message': {
@@ -109,12 +123,10 @@ def message():
                 'buttons' : mylist1
             }
         }
+    
      
     return jsonify(message)
+                  
 
-            
-        
-
-if __name__ == '__main__':
-    print("run")
+if __name__ == '__main__':    
     app.run(debug = True, host='0.0.0.0', port=80)
