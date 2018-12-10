@@ -2,14 +2,11 @@
 
 import requests
 import json
-# import urllib.request
+import urllib.request
 from configparser import ConfigParser, NoSectionError
 from PIL import Image
-# bytesio is used for file opened in binary mode like stringio in string mode.
-from io import BytesIO
-
-# from weather import weather_info
-from coin    import coin_info
+from weather import weather_info
+from coin    import coin_val
 
 from flask import Flask, request, jsonify, render_template
 
@@ -22,8 +19,7 @@ config = ConfigParser()
 try:
     # script relative path
     ab = os.path.dirname(__file__)
-    config.read(os.path.join(ab, 'pizzabot.conf'))
-    print("ab path %s" %os.path.join(ab, 'pizzabot.conf'))
+    config.read(os.path.join(ab, 'quizbot.conf'))
     MODE = config.get('ENV', 'MODE')
     BASE_URL = config.get(MODE, 'BASE_URL')
     TOKEN = config.get(MODE, 'TOKEN')
@@ -62,8 +58,8 @@ def get_photo_size(url):
         return width, height
 
     try:
-        file = requests.get(url, timeout=URL_OPEN_TIME_OUT)
-        img = Image.open(BytesIO(file.content))
+        file = urllib.request.urlopen(url, timeout=URL_OPEN_TIME_OUT)
+        img = Image.open(file)
         width, height = img.size
     except:
         print("photo size error!")
@@ -166,13 +162,13 @@ def pizza_info(**pizza):
     pizza_name = pizza['pizza_type']
     answer = ""
     if pizza_name == u'불고기피자':
-        answer = '<Photo>http://www.pizzamaru.co.kr/UpFile/Menu/cla8_F_01.jpg</Photo>'
+        answer = '<Photo>http://{}/quizbot/static/bulgogi.jpg</Photo>'.format(BASE_URL)
         answer += '한국의 맛 불고기를 부드러운 치즈와 함께!'
     elif pizza_name == u'페퍼로니피자':
-        answer = '<Photo>http://www.pizzamaru.co.kr/UpFile/Menu/cla6_F_01.jpg</Photo>'
+        answer = '<Photo>http://{}/quizbot/static/peperroni.jpg</Photo>'.format(BASE_URL)
         answer += '고소한 페파로니햄이 쫀득한 치즈위로 뜸뿍!'
     elif pizza_name == u'포테이토피자':
-        answer = '<Photo>http://www.pizzamaru.co.kr/UpFile/Menu/cla7_F_01.jpg</Photo>'
+        answer = '<Photo>http://{}/quizbot/static/potato.jpg</Photo>'.format(BASE_URL)
         answer += '저칼로리 감자의 담백한 맛!'
 
     print("pizza_info [%s]" %answer)
@@ -196,9 +192,8 @@ def pizza_order(**order):
 # ----------------------------------------------------
 # Dialogflow fullfillment 처리
 # ----------------------------------------------------
-@app.route('/webhook', methods=['POST'])
+@app.route("/webhook", methods=['POST'])
 def webhook():
-    print("webhook fn called")
     # --------------------------------
     # 액션 구함
     # --------------------------------
@@ -259,7 +254,6 @@ def message():
     else:
         answer = get_answer(content, user_key)
 
-
     # --------------------------------
     # 사진 구함
     # --------------------------------
@@ -306,15 +300,13 @@ def index():
 
 @app.route('/user/<name>')
 def user(name):
-    return '<h1>Hello, %s</h1>' %name
+    return '<h1>Hello, %s' %name
 
 @app.route('/ex01')
 def ex01():
     return render_template('ex01.html')
-    # return 'ex01.html'
 # ----------------------------------------------------
 # 메인 함수
 # ----------------------------------------------------
 if __name__ == '__main__':
-    print("pizza bot running...")
-    app.run(host='0.0.0.0', port=80, threaded=True, debug=True)
+    app.run(host='0.0.0.0', port=80, threaded=True, debug=DEBUG_MODE)
