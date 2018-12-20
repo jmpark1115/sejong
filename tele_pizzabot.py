@@ -1,5 +1,5 @@
 # coding=utf8
-#this program is syncronized with dialogflow PizzaBot_dev via Telegram
+#this program is syncronized with dialogflow PizzaBot_dev AND sejongT via Telegram
 
 import telegram
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler  # import modules
@@ -24,18 +24,15 @@ try:
     config.read(os.path.join(ab, 'telebot.conf'))
     MODE = config.get('ENV', 'MODE')
     my_token = config.get('ENV', 'TELEGRAM_TOKEN')
-    chief_id = config.get('ENV', 'TELEGRAM_ID')
+    chat_id = config.get('ENV', 'TELEGRAM_ID')
     TOKEN = config.get(MODE, 'TOKEN')
-    WEBHOOK = config.get(MODE, 'PATH')
     DEBUG_MODE = config.get(MODE, 'DEBUG_MODE')
-    print(MODE, WEBHOOK, DEBUG_MODE)
+    print(MODE, my_token, chat_id, TOKEN)
 except NoSectionError:
     print("========>>> NoSectionError")
 
 app = Flask(__name__)
 
-# 봇 선언
-bot = telegram.Bot(token=my_token)
 
 # 커스텀 키보드 설정
 custom_keyboard0 = [
@@ -44,15 +41,6 @@ custom_keyboard0 = [
 ]
 
 reply_markup0 = telegram.ReplyKeyboardMarkup(custom_keyboard0, resize_keyboard=True)
-
-# chat_id 아이디 설정
-try:
-    updates = bot.getUpdates()
-    chat_id = updates[-1].message.chat.id
-except IndexError:
-    print("index error")
-    chat_id = chief_id
-
 
 def hello(bot, update):
     update.message.reply_text('Hello {}'.format(update.message.from_user.first_name))
@@ -66,8 +54,8 @@ def help_command(bot, update):
 
 
 def start_command(bot, update):
-    chat_id = update.message.chat_id
-    bot.send_message(chat_id=chat_id, text="안녕하세요!", reply_markup=reply_markup0)
+    update.message.reply_text(text="안녕하세요! 시작합니다", reply_markup=reply_markup0)
+    
 
 # ----------------------------------------------------
 # 사진 체크
@@ -212,7 +200,7 @@ def ex01():
 
 def main():
     updater = Updater(my_token)
-    updater.bot.send_message(chat_id = chief_id,
+    updater.bot.send_message(chat_id = chat_id,
                              text="마이챗봇에 오신 것을 환영합니다",
                              reply_markup = reply_markup0)
 
